@@ -33,27 +33,33 @@ function _filter_hal($text, $filter) {
     $text = html_entity_decode($text);
 
     if (!preg_match('/\{\{\s*type\="hal_publications"([^\}]+)\}\}/', $text, $matches)) {
-        return;
+        watchdog('list_hal_publication', "No tag match", WATCHDOG_DEBUG);
+        return $text;
     }
 
     if (!preg_match("#url=\"([^\"]+)\"#", strip_tags($matches[1]), $uris)) {
-        return;
+        watchdog('list_hal_publication', "Tag found but syntax error with url", WATCHDOG_ERROR);
+        return $text;
     }
 
-    preg_match("/css\=\.\.\/([^&]+)&?/", $uris[1], $css);
+    if (!preg_match("/css\=\.\.\/([^&]+)&?/", $uris[1], $css)) {
+        watchdog('list_hal_publication', "Fail getting css style from url", WATCHDOG_ERROR);
+    } else {
+        $cssUri = sprintf("http://hal.univ-grenoble-alpes.fr/%s", $css[1]);
+        variable_set(sprintf("node-%s.list_hal_publication.css", $nodeId), $cssUri);
+    }
 
-    $cssUri = sprintf("http://hal.univ-grenoble-alpes.fr/%s", $css[1]);
-    variable_set(sprintf("node-%s.list_hal_publication.css", $nodeId), $cssUri);
-
+    watchdog('list_hal_publication', "drupal_http_request: Start", WATCHDOG_DEBUG);
     $content = drupal_http_request($uris[1]);
-    
+    watchdog('list_hal_publication', "drupal_http_request: Done", WATCHDOG_DEBUG);    
+
     $dom = new DomDocument();
-    $dom->loadHTML($content);
+    $dom->loadHTML($content->data);
     
     $tags = $dom->getElementsByTagname("body");
     
     if ($tags->length != 1) {
-        return;
+        return $text;
     }
 
     foreach ($tags as $tag) {
