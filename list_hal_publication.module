@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * Implements hook_filter_info
+ */
+function list_hal_publication_filter_info() {
+    return array(
+        'list_hal' => array(
+            'title' => t('hal publications'),
+            'description' => t('Active this filter to allow a user adding a special balise to build a list of publications from HAL'),
+            'settings callback' => '_filter_hal_settings',
+            'process callback' => '_filter_hal',
+        ),
+    );
+}
+
+function _filter_hal($text, $filter) {
+    $text = html_entity_decode($text);
+
+    if (!preg_match('/\{\{\s*type\="hal_publications"([^\}]+)\}\}/', $text, $matches)) {
+        return;
+    }
+
+    if (!preg_match("/href=\"([^\"]+)\"/", $matches[1], $uris)) {
+        return;
+    }
+
+    $content = file_get_contents($uris[1]);
+    
+    $dom = new DomDocument();
+    $dom->loadHTML($content);
+    
+    $tags = $dom->getElementsByTagname("body");
+    
+    if ($tags->length != 1) {
+        return;
+    }
+
+    foreach ($tags as $tag) {
+        $halPublis = DOMinnerHTML($tag);
+    }
+
+    $text = str_replace($matches[0], $halPublis, $text);
+
+    return $text;
+}
+
+function DOMinnerHTML(DOMNode $element) {
+    $innerHTML = ""; 
+    $children  = $element->childNodes;
+    
+    foreach ($children as $child) {
+        $innerHTML .= $element->ownerDocument->saveHTML($child);
+    }
+    
+    return $innerHTML; 
+}
