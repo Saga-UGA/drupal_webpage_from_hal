@@ -49,7 +49,7 @@ function _filter_hal($text, $filter) {
         variable_set(sprintf("node-%s.list_hal_publication.css", $nodeId), $cssUri);
     }
 
-    watchdog('list_hal_publication', "drupal_http_request: Start", WATCHDOG_DEBUG);
+    watchdog('list_hal_publication', sprintf("drupal_http_request(%s)", $uris[1]), WATCHDOG_DEBUG);
     $content = drupal_http_request($uris[1]);
     watchdog('list_hal_publication', "drupal_http_request: Done", WATCHDOG_DEBUG);    
 
