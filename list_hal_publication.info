@@ -1,6 +1,0 @@
-name = publication from hal
-description = Filter to allow rendering a list of publication building from Hal
-core = 7.x
-package = SAGA
-dependencies[] = saga_base
-

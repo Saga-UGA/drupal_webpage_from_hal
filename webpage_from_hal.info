@@ -1,0 +1,6 @@
+name = Webpage from Hal
+description = Module to include an html list of publications from Hal directly in your website
+core = 7.x
+package = SAGA
+dependencies[] = saga_base
+

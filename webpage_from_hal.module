@@ -3,16 +3,16 @@
 /**
  * Implements hook_init
  */
-function list_hal_publication_init() {
+function webpage_from_hal_init() {
 }
 
 /**
  * Implements hook_filter_info
  */
-function list_hal_publication_filter_info() {
+function webpage_from_hal_filter_info() {
     return array(
-        'list_hal' => array(
-            'title' => t('hal publications'),
+        'webpage_from_hal' => array(
+            'title' => t('Include html content from hal url'),
             'description' => t('Active this filter to allow a user adding a special balise to build a list of publications from HAL'),
             'settings callback' => '_filter_hal_settings',
             'process callback' => '_filter_hal',
@@ -23,35 +23,35 @@ function list_hal_publication_filter_info() {
 /**
  * Implements preprocess_node
  */
-function list_hal_publication_preprocess_node($variables) {
+function webpage_from_hal_preprocess_node($variables) {
     $nodeId = $variables['nid'];
-    drupal_add_css(variable_get(sprintf("node-%s.list_hal_publication.css", $nodeId)), array('type' => 'external'));
+    drupal_add_css(variable_get(sprintf("node-%s.webpage_from_hal.css", $nodeId)), array('type' => 'external'));
 }
 
 function _filter_hal($text, $filter) {
     $nodeId = arg(1);
     $text = html_entity_decode($text);
 
-    if (!preg_match('/\{\{\s*type\="hal_publications"([^\}]+)\}\}/', $text, $matches)) {
-        watchdog('list_hal_publication', "No tag match", WATCHDOG_DEBUG);
+    if (!preg_match('/\{\{\s*type\="webpage_from_hal"([^\}]+)\}\}/', $text, $matches)) {
+        watchdog('webpage_from_hal', "No tag match", WATCHDOG_DEBUG);
         return $text;
     }
 
     if (!preg_match("#url=\"([^\"]+)\"#", strip_tags($matches[1]), $uris)) {
-        watchdog('list_hal_publication', "Tag found but syntax error with url", WATCHDOG_ERROR);
+        watchdog('webpage_from_hal', "Tag found but syntax error with url", WATCHDOG_ERROR);
         return $text;
     }
 
     if (!preg_match("/css\=\.\.\/([^&]+)&?/", $uris[1], $css)) {
-        watchdog('list_hal_publication', "Fail getting css style from url", WATCHDOG_ERROR);
+        watchdog('webpage_from_hal', "Fail getting css style from url", WATCHDOG_ERROR);
     } else {
         $cssUri = sprintf("http://hal.univ-grenoble-alpes.fr/%s", $css[1]);
-        variable_set(sprintf("node-%s.list_hal_publication.css", $nodeId), $cssUri);
+        variable_set(sprintf("node-%s.webpage_from_hal.css", $nodeId), $cssUri);
     }
 
-    watchdog('list_hal_publication', sprintf("drupal_http_request(%s)", $uris[1]), WATCHDOG_DEBUG);
+    watchdog('webpage_from_hal', sprintf("drupal_http_request(%s)", $uris[1]), WATCHDOG_DEBUG);
     $content = drupal_http_request($uris[1]);
-    watchdog('list_hal_publication', "drupal_http_request: Done", WATCHDOG_DEBUG);    
+    watchdog('webpage_from_hal', "drupal_http_request: Done", WATCHDOG_DEBUG);    
 
     $dom = new DomDocument();
     $dom->loadHTML($content->data);
