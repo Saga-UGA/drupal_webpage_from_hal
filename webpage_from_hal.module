@@ -42,6 +42,15 @@ function _filter_hal($text, $filter) {
         return $text;
     }
 
+    $infos = parse_url($uris[1]);
+    $ip = gethostbyname($infos['host']);
+
+    if ($ip != '193.48.96.10') {
+        watchdog('webpage_from_hal', "Url invalid", WATCHDOG_ERROR);
+        
+        return $text;
+    }
+
     if (!preg_match("/css\=\.\.\/([^&]+)&?/", $uris[1], $css)) {
         watchdog('webpage_from_hal', "Fail getting css style from url", WATCHDOG_ERROR);
     } else {
