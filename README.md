@@ -20,7 +20,7 @@ By this filter, Drupal gets the url and includes the html content directly on yo
   1. Enable `Include html content from hal url` filter.
 
 **Note:**
-> Caution, this filter should be placed among the top ones. If an other filter alters html content, there is a good chance that this filter will not retrieve the tag. So do not work !  
+> Caution, this filter should be placed among the top ones. If an other filter alters html content, there is a good chance that this filter does not retrieve the tag and so don't work !  
   
 ## Support ##
 
