@@ -1,4 +1,4 @@
-# Drupal modudle to include an html list of publications from Hal directly in your website #
+# Drupal module to include an html list of publications from Hal directly in your website #
 
 ## How does it works ? ##
 
