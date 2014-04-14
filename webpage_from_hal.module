@@ -33,12 +33,12 @@ function _filter_hal($text, $filter) {
     $text = html_entity_decode($text);
 
     if (!preg_match('/\{\{\s*type\="webpage_from_hal"([^\}]+)\}\}/', $text, $matches)) {
-        watchdog('webpage_from_hal', "No tag match", WATCHDOG_DEBUG);
+        watchdog('webpage_from_hal', "No tag match", array(), WATCHDOG_DEBUG);
         return $text;
     }
 
     if (!preg_match("#url=\"([^\"]+)\"#", strip_tags($matches[1]), $uris)) {
-        watchdog('webpage_from_hal', "Tag found but syntax error with url", WATCHDOG_ERROR);
+        watchdog('webpage_from_hal', "Tag found but syntax error with url", array(), WATCHDOG_ERROR);
         return $text;
     }
 
@@ -46,35 +46,34 @@ function _filter_hal($text, $filter) {
     $ip = gethostbyname($infos['host']);
 
     if ($ip != '193.48.96.10') {
-        watchdog('webpage_from_hal', "Url invalid", WATCHDOG_ERROR);
+        watchdog('webpage_from_hal', "Url invalid", array(), WATCHDOG_ERROR);
         
         return $text;
     }
 
     if (!preg_match("/css\=\.\.\/([^&]+)&?/", $uris[1], $css)) {
-        watchdog('webpage_from_hal', "Fail getting css style from url", WATCHDOG_ERROR);
+        watchdog('webpage_from_hal', "Fail getting css style from url", array(), WATCHDOG_ERROR);
     } else {
         $cssUri = sprintf("http://hal.univ-grenoble-alpes.fr/%s", $css[1]);
         variable_set(sprintf("node-%s.webpage_from_hal.css", $nodeId), $cssUri);
     }
 
-    watchdog('webpage_from_hal', sprintf("drupal_http_request(%s)", $uris[1]), WATCHDOG_DEBUG);
+    watchdog('webpage_from_hal', sprintf("drupal_http_request(%s)", $uris[1]), array(), WATCHDOG_DEBUG);
     $content = drupal_http_request($uris[1]);
-    watchdog('webpage_from_hal', "drupal_http_request: Done", WATCHDOG_DEBUG);    
+    watchdog('webpage_from_hal', "drupal_http_request: Done", array(), WATCHDOG_DEBUG);    
 
-    $dom = new DomDocument();
-    $dom->loadHTML($content->data);
+    $dom = new DomDocument('1.0', 'UTF-8');
+    $str = mb_convert_encoding($content->data, "HTML-ENTITIES");
+    $dom->loadHTML($str);
+
+    $tag = $dom->getElementById("res_script");
     
-    $tags = $dom->getElementsByTagname("body");
-    
-    if ($tags->length != 1) {
+    if (null === $tag) {
         return $text;
     }
-
-    foreach ($tags as $tag) {
-        $halPublis = DOMinnerHTML($tag);
-    }
-
+    
+    $halPublis = DOMinnerHTML($tag);
+    
     $text = str_replace($matches[0], $halPublis, $text);
 
     return $text;
