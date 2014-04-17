@@ -53,6 +53,7 @@ function _filter_hal($text, $filter) {
 
     if (!preg_match("/css\=\.\.\/([^&]+)&?/", $uris[1], $css)) {
         watchdog('webpage_from_hal', "Fail getting css style from url", array(), WATCHDOG_ERROR);
+        variable_del(sprintf("node-%s.webpage_from_hal.css", $nodeId));
     } else {
         $cssUri = sprintf("http://hal.univ-grenoble-alpes.fr/%s", $css[1]);
         variable_set(sprintf("node-%s.webpage_from_hal.css", $nodeId), $cssUri);
