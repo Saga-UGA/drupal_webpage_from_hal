@@ -79,7 +79,8 @@ function _filter_hal($text, $filter) {
 
     $res_script = $dom->saveXML($entries->item(0));
 
-    $text = str_replace($matches[0], $halPublis, $res_script);
+
+    $text = str_replace($matches[0], $res_script, $text);
 
     return $text;
 }
