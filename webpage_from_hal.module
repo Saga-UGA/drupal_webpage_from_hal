@@ -64,29 +64,22 @@ function _filter_hal($text, $filter) {
     watchdog('webpage_from_hal', "drupal_http_request: Done", array(), WATCHDOG_DEBUG);    
 
     $dom = new DomDocument('1.0', 'UTF-8');
+    $dom->preserveWhiteSpace = false;
+
     $str = mb_convert_encoding($content->data, "HTML-ENTITIES");
     $dom->loadHTML($str);
+    $xpath = new DOMXpath($dom);
+    $entries = $xpath->query('//div[@id="res_script"]');
 
-    $tag = $dom->getElementById("res_script");
-    
-    if (null === $tag) {
+    if ($entries->length == 0) {
+        watchdog('webpage_from_hal', 'Can\'t localized <div id="res_script">', array(), WATCHDOG_DEBUG);
+
         return $text;
     }
-    
-    $halPublis = DOMinnerHTML($tag);
-    
-    $text = str_replace($matches[0], $halPublis, $text);
+
+    $res_script = $dom->saveXML($entries->item(0));
+
+    $text = str_replace($matches[0], $halPublis, $res_script);
 
     return $text;
-}
-
-function DOMinnerHTML(DOMNode $element) {
-    $innerHTML = ""; 
-    $children  = $element->childNodes;
-    
-    foreach ($children as $child) {
-        $innerHTML .= $element->ownerDocument->saveHTML($child);
-    }
-    
-    return $innerHTML; 
 }
