@@ -7,6 +7,15 @@ function webpage_from_hal_init() {
 }
 
 /**
+ * Implements hook_block_info
+ */
+function webpage_from_hal_block_info() {
+    return array(
+        'cache' => DRUPAL_NO_CACHE,
+    );
+}
+
+/**
  * Implements hook_filter_info
  */
 function webpage_from_hal_filter_info() {
